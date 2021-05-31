@@ -21,9 +21,37 @@ sudo apt-get install docker-compose
 docker-compose up -d
 ```
 
-## Comprobación de la respuesta de cada web (ambas en el mismo puerto) a través de curl:
+## Comprobar que IP tiene cada uno de los contendores donde alojaremos la web
 
 ```bash
-curl -H "Host: sitio1.com" localhost
-curl -H "Host: sitio2.com" localhost
+docker inspect 3e8 (los 3 primeros números del ID del contenedor)
 ``` 
+## Crear el fichero load-balancing.conf en /etc/nginx/conf.d en el contendor que aloja el proxy y eliminar el default.conf
+
+```bash
+upstream backend {
+        server 192.168.10.11;
+        server 192.168.10.12;
+    }
+	
+    server {
+        listen      80;
+        server_name loadbalancing.example.com;
+
+        location / {
+	        proxy_redirect      off;
+	        proxy_set_header    X-Real-IP $remote_addr;
+	        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+	        proxy_set_header    Host $http_host;
+		proxy_pass http://backend;
+	}
+}
+```
+## Modificar (si queremos) los archivos html que muestran las páginas, se encuentran en el directorio: /usr/share/nginx/html/index.html
+
+## Reiniciar el contenedor nginx(proxy) para la comprobación final
+```bash
+/etc/init.d/nginx restart
+```
+
+## En el navegador introducir la IP del proxy y actualizar para que cambie entre las webs refernciadas
