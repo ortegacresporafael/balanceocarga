@@ -1,0 +1,36 @@
+version: "3"
+services:
+  ngnix:
+    build: .
+    ports:
+      - "80:80"
+    networks:
+      red1:
+       ipv4_address: 172.20.0.10
+
+  sitio1:
+    image: nginx
+    ports: 
+      - "80"
+    volumes:
+      - ./sitio1:/usr/share/nginx/html
+    networks:
+      red1:
+       ipv4_address: 172.20.0.15
+
+  sitio2:
+    image: nginx
+    ports: 
+      - "80"
+    volumes:
+      - ./sitio2:/usr/share/nginx/html
+    networks:
+      red1:
+       ipv4_address: 172.20.0.20
+
+networks:
+  red1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
